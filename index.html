@@ -349,13 +349,20 @@
     <!-- Overlay de lecture -->
     <div id="overlay" onclick="closeReader()"></div>
 
-    <!-- Visionneuse plein écran (Lightbox) pour les médailles -->
+    <!-- Visionneuse plein écran (Lightbox) avec LOUPE pour les médailles -->
     <div id="lightbox" class="fixed inset-0 z-[400] bg-black/95 opacity-0 pointer-events-none transition-opacity duration-300 flex justify-center items-center" onclick="closeLightbox()">
         <button class="absolute top-4 right-4 md:top-8 md:right-8 text-white/70 hover:text-white transition-colors p-2 z-50" onclick="closeLightbox()">
             <i data-lucide="x" class="w-8 h-8 md:w-10 md:h-10"></i>
         </button>
-        <!-- L'image de la lightbox ne ferme pas le modal si on clique dessus -->
-        <img id="lightbox-img" src="" alt="Aperçu agrandi" class="max-w-[90vw] max-h-[90vh] object-contain shadow-2xl rounded" onclick="event.stopPropagation()">
+        
+        <!-- Conteneur relatif pour capter la souris et contenir la loupe -->
+        <div id="lightbox-container" class="relative flex justify-center items-center max-w-[90vw] max-h-[90vh]" onclick="event.stopPropagation()">
+            <!-- L'image de la lightbox (curseur croix pour indiquer l'interaction) -->
+            <img id="lightbox-img" src="" alt="Aperçu agrandi" class="max-w-full max-h-[90vh] object-contain shadow-2xl rounded cursor-crosshair">
+            
+            <!-- La loupe elle-même (invisible par défaut) -->
+            <div id="magnifier" class="pointer-events-none absolute border-[3px] border-white/50 rounded-full shadow-[0_15px_35px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(0,0,0,0.5)] hidden z-50" style="width: 180px; height: 180px; background-repeat: no-repeat; background-color: #111;"></div>
+        </div>
     </div>
 
     <!-- ================= TIROIR DE LECTURE ================= -->
@@ -385,7 +392,7 @@
                     <p class="drop-cap">Dans les familles, il y a ce qui se dit, et ce qui se transmet. Je n'ai hérité d'aucun grand récit de mon arrière-grand-père, seulement de ce lourd objet en métal : une médaille des cheminots de la République Française.</p>
                     <p class="mt-4">Créée par le sculpteur en vogue Charles Maurice Favre-Bertin, lauréat du prestigieux Prix de Rome, elle porte au dos une gravure nette : le nom d'<strong>Alphonse Fillinger</strong>, et une date, <strong>1946</strong>.</p>
                     <h3 class="font-display text-2xl mt-8 mb-4">Un symbole de la reconstruction</h3>
-                    <p>Cette date n'est pas anodine. Au lendemain de la Seconde Guerre mondiale, la France exsangue doit se reconstruire. Le réseau ferroviaire, largement détruit par les bombardements et les sabotages, est la priorité absolue du pays. Remettre une telle décoration en 1946, c'est pour l'État une manière solennelle de réaffirmer l'autorité de la République et de remercier ceux qui, par leur labeur acharné, ont maintenu le pays en vie.</p>
+                    <p>Cette date n'est pas anodine. Au lendemain de la Seconde Guerre mondiale, la France exsangue doit se reconstruire. Le réseau ferroviaire, largement détruit par les bombardements et les sabotages, est la priority absolue du pays. Remettre une telle décoration en 1946, c'est pour l'État une manière solennelle de réaffirmer l'autorité de la République et de remercier ceux qui, par leur labeur acharné, ont maintenu le pays en vie.</p>
                     <p class="mt-4">Plutôt que de laisser cet objet silencieux dans un tiroir, j'ai décidé de l'utiliser comme une clé pour comprendre : que signifiait être cheminot dans les tourmentes du XXe siècle ?</p>
                 `,
                 unlocks: 'social',
@@ -556,23 +563,66 @@
             });
         }
 
-        // --- Fonctions de la Lightbox (Visionneuse plein écran) ---
+        // --- Fonctions de la Lightbox (Visionneuse plein écran) avec Loupe ---
         function openLightbox(src) {
             const lightbox = document.getElementById('lightbox');
             const lightboxImg = document.getElementById('lightbox-img');
-            lightboxImg.src = src;
+            const magnifier = document.getElementById('magnifier');
             
-            // Fait apparaitre la lightbox au dessus de tout
+            lightboxImg.src = src;
+            // Assigner la même image au fond de la loupe
+            magnifier.style.backgroundImage = "url('" + src + "')";
+            
+            // Fait apparaitre la lightbox
             lightbox.classList.remove('pointer-events-none', 'opacity-0');
             lightbox.classList.add('pointer-events-auto', 'opacity-100');
         }
 
         function closeLightbox() {
             const lightbox = document.getElementById('lightbox');
-            // Cache la lightbox
+            const magnifier = document.getElementById('magnifier');
+            
+            // Cache la lightbox et la loupe
             lightbox.classList.remove('pointer-events-auto', 'opacity-100');
             lightbox.classList.add('pointer-events-none', 'opacity-0');
+            magnifier.classList.add('hidden'); 
         }
+
+        // Logique de la loupe interactive
+        document.addEventListener('DOMContentLoaded', () => {
+            const img = document.getElementById('lightbox-img');
+            const magnifier = document.getElementById('magnifier');
+            const zoom = 2.5; // Facteur de grossissement de la loupe
+            
+            img.addEventListener('mousemove', function(e) {
+                // Afficher la loupe
+                magnifier.classList.remove('hidden');
+                
+                const rect = img.getBoundingClientRect();
+                
+                // Coordonnées de la souris par rapport à l'image affichée
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // Pourcentage de la position de la souris
+                const xPerc = (x / rect.width) * 100;
+                const yPerc = (y / rect.height) * 100;
+                
+                // Positionner la loupe exactement sous le curseur
+                magnifier.style.left = `${x - magnifier.offsetWidth / 2}px`;
+                magnifier.style.top = `${y - magnifier.offsetHeight / 2}px`;
+                
+                // Zoomer l'image de fond de la loupe proportionnellement à la taille d'affichage
+                magnifier.style.backgroundSize = `${rect.width * zoom}px ${rect.height * zoom}px`;
+                
+                // Déplacer l'image de fond pour centrer le détail survolé
+                magnifier.style.backgroundPosition = `${xPerc}% ${yPerc}%`;
+            });
+            
+            img.addEventListener('mouseleave', function() {
+                magnifier.classList.add('hidden');
+            });
+        });
 
         // 4. Système de lecture
         const readerPanel = document.getElementById('reader-panel');

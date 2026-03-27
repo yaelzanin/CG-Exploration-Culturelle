@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exposition Virtuelle | Une médaille, une histoire</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Polices Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Special+Elite&display=swap" rel="stylesheet">
+    
+    <!-- Icônes Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'museum-bg': '#FDFBF7',
+                        'museum-ink': '#2C2825',
+                        'museum-red': '#8B2626',
+                        'museum-accent': '#D9D0C1',
+                        'paper': '#F4EFE6',
+                    },
+                    fontFamily: {
+                        'serif': ['Lora', 'serif'],
+                        'display': ['Playfair Display', 'serif'],
+                        'handwriting': ['Caveat', 'cursive'],
+                        'typewriter': ['Special Elite', 'monospace'],
+                    }
+                }
+            }
+        }
+    </style>
+
+    <style>
+        /* Comportement global et scroll */
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            background-color: #FDFBF7;
+            color: #2C2825;
+            overflow: hidden; 
+        }
+
+        /* --- SECTION INTRO : BOÎTE EN CARTON AU GRENIER --- */
+        #intro-section {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            
+            /* Fond bois avec effet de projecteur / pénombre (vignette) */
+            background-color: #050302;
+            background-image: 
+                radial-gradient(circle at center, rgba(15, 10, 6, 0.2) 0%, rgba(5, 3, 2, 0.85) 60%, #000000 100%),
+                url('assets/bois.jpg');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: multiply, normal; /* Fusionne le dégradé sombre avec le bois */
+            
+            z-index: 300;
+            perspective: 1500px;
+            transition: opacity 1s ease-in-out;
+            gap: 2rem;
+        }
+
+        /* Effet de poussière / bruit visuel par-dessus le bois */
+        #intro-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none; /* Ne bloque pas les clics */
+            z-index: 1;
+        }
+
+        #memory-box {
+            position: relative;
+            width: 300px; height: 220px;
+            perspective: 1500px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: transform 1.5s cubic-bezier(0.77, 0, 0.175, 1);
+            z-index: 10; /* Au-dessus de la poussière */
+        }
+        @media (min-width: 768px) {
+            #memory-box { width: 450px; height: 320px; margin-bottom: 2rem; }
+        }
+
+        /* L'effet de zoom plonge DANS la boîte. Plus de disparition transparente ! */
+        #memory-box.zoom-in {
+            transform: scale(25) translateY(10px);
+            pointer-events: none;
+        }
+
+        /* Le fond de la boîte (Intérieur sombre) */
+        .box-base {
+            position: absolute; inset: 0;
+            background-color: #120e0a;
+            border: 4px solid #4a3623;
+            border-radius: 2px;
+            /* Ombre très forte pour bien ancrer la boîte sur le bois */
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.9), 0 30px 60px rgba(0,0,0,0.95);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Les deux volets en carton (Texture de carton vieillie) */
+        .box-flap-left, .box-flap-right {
+            position: absolute; top: 0; height: 100%; width: 50%;
+            /* Assombrissement et teinte vieillie pour le carton */
+            background-color: #96704b; 
+            background-image: 
+                linear-gradient(to bottom, rgba(20, 10, 0, 0.2), rgba(20, 10, 0, 0.75)), /* Patine / Crassouille vers le bas */
+                url('assets/carton.jpg');
+            background-blend-mode: multiply, normal;
+            background-size: 200% 100%; /* L'image fait deux fois la largeur d'un volet */
+            border: 2px solid #453221;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 5px 15px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+
+        .box-flap-left {
+            left: 0; transform-origin: left center;
+            background-position: left center;
+            border-right: 1px solid #2e1e12;
+        }
+
+        .box-flap-right {
+            right: 0; transform-origin: right center;
+            background-position: right center;
+            border-left: 1px solid #2e1e12;
+        }
+
+        /* Animation d'ouverture des deux volets */
+        .box-flap-left.open { transform: rotateY(-125deg); }
+        .box-flap-right.open { transform: rotateY(125deg); }
+
+        /* Bouton d'ouverture */
+        #intro-btn {
+            transition: opacity 0.4s ease;
+        }
+
+        /* --- SECTION BOARD (INTERACTIVE CANVAS) --- */
+        #board-section {
+            position: absolute; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: #5c4a3d; /* Fallback couleur liège sombre */
+            background-image: 
+                radial-gradient(circle at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%), /* Vignette d'ambiance */
+                url('assets/liege.jpg'); /* Texture liège */
+            background-size: cover, 300px; /* Le liège se répète en tuiles pour rester net */
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+            overflow: hidden; user-select: none;
+        }
+
+        #strings-layer {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; z-index: 5;
+            filter: drop-shadow(2px 5px 3px rgba(0,0,0,0.5));
+        }
+
+        .red-string {
+            fill: none; stroke: #8B2626; stroke-width: 2.5; stroke-linecap: round;
+        }
+
+        .pinned-item {
+            position: absolute; cursor: grab;
+            transition: opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.2s ease, filter 0.3s ease;
+            box-shadow: 5px 10px 20px rgba(0,0,0,0.4);
+            z-index: 10; transform-origin: center top;
+        }
+        
+        .pinned-item:active { cursor: grabbing; }
+        .pinned-item:hover:not(.locked-item) {
+            transform: scale(1.05) !important; z-index: 50 !important; filter: brightness(1.1);
+        }
+
+        .locked-item {
+            opacity: 0; pointer-events: none;
+            transform: translateY(40px) scale(0.9) !important; 
+        }
+
+        @keyframes pulse-new {
+            0% { box-shadow: 0 0 0 0 rgba(139, 38, 38, 0.5); }
+            70% { box-shadow: 0 0 0 20px rgba(139, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(139, 38, 38, 0); }
+        }
+        .just-unlocked { animation: pulse-new 2s infinite; }
+
+        /* Badge visuel en CSS (mis à jour en argenté/acier pour ressembler à la vraie médaille) */
+        .badge-item {
+            background: radial-gradient(circle at 30% 30%, #b8b8b8, #8a8a8a, #4a4a4a);
+            box-shadow: 5px 10px 15px rgba(0,0,0,0.6), inset -5px -5px 15px rgba(0,0,0,0.5), inset 2px 2px 5px rgba(255,255,255,0.4);
+            border: 2px solid #2a2a2a !important;
+        }
+
+        /* Épingles / Attaches */
+        .pin {
+            position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+            width: 10px; height: 10px; background: radial-gradient(circle at 30% 30%, #e2e2e2, #888);
+            border-radius: 50%; box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3), 2px 4px 5px rgba(0,0,0,0.5); z-index: 20;
+        }
+        .pin::after {
+            content: ''; position: absolute; top: 30%; left: 30%;
+            width: 2px; height: 2px; background: rgba(255,255,255,0.8); border-radius: 50%;
+        }
+        @media (min-width: 768px) {
+            .pin { width: 14px; height: 14px; top: 12px; }
+            .pin::after { width: 3px; height: 3px; top: 40%; left: 40%; }
+        }
+
+        .clip {
+            position: absolute; top: -5px; left: 15px;
+            width: 12px; height: 25px; border: 2px solid #b0b0b0; border-radius: 10px;
+            box-shadow: 2px 2px 3px rgba(0,0,0,0.3); z-index: 20;
+        }
+        @media (min-width: 768px) {
+            .clip { width: 15px; height: 35px; left: 20px; border-width: 3px; }
+        }
+
+        /* Le tiroir de lecture */
+        #reader-panel {
+            position: fixed; top: 0; right: -100%;
+            width: 100%; max-width: 650px; height: 100vh;
+            background-color: #FDFBF7; box-shadow: -20px 0 50px rgba(0,0,0,0.3);
+            transition: right 0.5s cubic-bezier(0.25, 1, 0.5, 1); z-index: 200; overflow-y: auto;
+            border-left: 1px solid #D9D0C1;
+        }
+        #reader-panel.open { right: 0; }
+        
+        #overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+            opacity: 0; pointer-events: none; transition: opacity 0.5s ease; z-index: 150;
+        }
+        #overlay.open { opacity: 1; pointer-events: auto; }
+
+        .drop-cap::first-letter {
+            font-family: 'Playfair Display', serif; font-size: 3.8rem; line-height: 1;
+            float: left; margin-right: 0.6rem; color: #8B2626; font-weight: 700; margin-top: 0.2rem;
+        }
+    </style>
+</head>
+<body class="font-serif antialiased selection:bg-museum-red selection:text-white">
+
+    <!-- ================= SECTION 1 : INTRODUCTION (ANIMATION BOÎTE CARTON) ================= -->
+    <section id="intro-section">
+        
+        <!-- Titre déplacé au-dessus, bien lisible, avec un fort contraste pour se détacher du fond bois sombre -->
+        <div id="intro-text" class="text-center transition-opacity duration-700 z-10 px-4 mb-2 md:mb-6">
+            <h1 class="font-display text-4xl md:text-6xl mb-2 text-[#e8d0a9] font-bold tracking-wide drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]">Une médaille, une histoire.</h1>
+            <p class="font-serif italic text-[#D9D0C1] text-sm md:text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">L'enquête commence par cette boîte...</p>
+        </div>
+
+        <!-- La boîte d'archives -->
+        <div id="memory-box" class="group" onclick="startExploration()">
+            
+            <!-- Intérieur de la boîte (Totalement vide) -->
+            <div class="box-base"></div>
+            
+            <!-- Les deux volets en carton -->
+            <div class="box-flap-left"></div>
+            <div class="box-flap-right"></div>
+            
+            <!-- Bouton central marron foncé (Accessible et identifiable) -->
+            <div id="intro-btn" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#3a2514] px-6 py-3 md:px-8 md:py-4 rounded-full border-2 border-[#1a1008] text-white font-bold shadow-[0_5px_15px_rgba(0,0,0,0.8)] group-hover:bg-[#21150b] group-hover:scale-105 transition-all flex items-center gap-2 md:gap-3 font-sans text-[10px] md:text-xs uppercase tracking-widest z-20">
+                <i data-lucide="unlock" class="w-4 h-4 md:w-5 md:h-5"></i>
+                <span>Cliquer pour ouvrir</span>
+            </div>
+        </div>
+        
+    </section>
+
+    <!-- ================= SECTION 2 : LE MUR D'ARCHIVES ================= -->
+    <section id="board-section">
+        
+        <!-- UI Indicateur (Taille réduite, discret et caché au début) -->
+        <div id="ui-indicator" class="absolute top-4 left-4 md:top-6 md:left-6 z-[80] opacity-0 transition-opacity duration-1000 text-black font-sans text-[10px] tracking-widest uppercase pointer-events-none flex items-center space-x-2 bg-white/95 backdrop-blur px-3 py-1.5 rounded-sm border border-black/20 shadow-md">
+            <i data-lucide="search" class="w-3 h-3 text-museum-red"></i>
+            <span id="progress-indicator" class="font-bold">Document 1 / 5</span>
+        </div>
+
+        <svg id="strings-layer"></svg>
+
+        <!-- NOEUD 1 : LA MÉDAILLE (Représentation visuelle CSS) -->
+        <div class="pinned-item badge-item w-20 h-20 md:w-32 md:h-32 rounded-full flex flex-col items-center justify-center shadow-2xl just-unlocked top-[40%] left-[35%] md:top-[40%] md:left-[45%]" 
+             id="node-badge" data-id="badge" style="transform: rotate(5deg);">
+            <div class="pin" style="top: 5px;"></div>
+            <div class="text-[#1a1a1a] font-typewriter font-black text-[12px] md:text-xl text-center tracking-widest mt-2" style="text-shadow: 1px 1px 0px rgba(255,255,255,0.3);">
+                R.F<br><span class="text-[6px] md:text-[10px] font-sans">A. FILLINGER</span>
+            </div>
+        </div>
+
+        <!-- NOEUD 2 : ARCHIVE PHOTO -->
+        <div class="pinned-item bg-[#f0ede6] p-2 md:p-3 pb-6 md:pb-10 border border-[#d4cfc5] shadow-lg locked-item w-28 md:w-48 top-[10%] left-[5%] md:top-[10%] md:left-[15%]" 
+             id="node-social" data-id="social" style="transform: rotate(-6deg);">
+            <div class="clip"></div>
+            <img src="assets/Cheminots.jpg" alt="Cheminots" class="w-full h-auto object-cover grayscale sepia-[20%] border border-[#2a2724]" draggable="false" onerror="this.style.display='none';">
+            <div class="text-center mt-2 md:mt-3 font-typewriter text-[10px] md:text-sm text-museum-ink font-bold leading-tight">Fonds 1935</div>
+        </div>
+
+        <!-- NOEUD 3 : DOCUMENT ADMINISTRATIF -->
+        <div class="pinned-item bg-[#f7f5f0] p-2 md:p-3 shadow-lg border border-museum-accent locked-item w-32 md:w-56 top-[65%] left-[5%] md:top-[55%] md:left-[12%]" 
+             id="node-war" data-id="war" style="transform: rotate(3deg);">
+            <div class="pin"></div>
+            <img src="assets/bataille du rail.jpg" alt="Bataille du rail" class="w-full h-20 md:h-32 object-cover grayscale contrast-125 border border-museum-ink/20" draggable="false" onerror="this.style.display='none';">
+            <div class="mt-2 md:mt-4 text-center text-museum-red border-t border-museum-red/30 pt-1 md:pt-2 transform -rotate-2 text-[9px] md:text-[10px] font-typewriter font-bold">DÉCLASSIFIÉ</div>
+        </div>
+
+        <!-- NOEUD 4 : CARTE ALSACE -->
+        <div class="pinned-item bg-white p-1.5 md:p-2 shadow-lg border border-museum-accent locked-item w-32 h-32 md:w-56 md:h-56 top-[15%] right-[5%] md:right-auto md:top-[15%] md:left-[70%]" 
+             id="node-alsace" data-id="alsace" style="transform: rotate(-4deg);">
+            <div class="pin"></div>
+            <div class="w-full h-full overflow-hidden border border-museum-accent/50">
+                <img src="assets/carte alsace.jpg" alt="Carte Alsace" class="w-full h-full object-cover sepia-[30%] contrast-110" draggable="false" onerror="this.style.display='none';">
+            </div>
+        </div>
+
+        <!-- NOEUD 5 : CARNET DE RECHERCHE (Format CSS) -->
+        <div class="pinned-item locked-item w-28 h-36 md:w-40 md:h-56 top-[60%] right-[5%] md:right-auto md:top-[60%] md:left-[75%]" 
+             id="node-conclusion" data-id="conclusion" style="transform: rotate(-8deg);">
+            <!-- Carnet simulé en pur CSS -->
+            <div class="w-full h-full bg-[#2c251e] shadow-xl rounded-r-md border-l-8 md:border-l-[12px] border-[#14110e] relative flex items-center justify-center">
+                <!-- Titre sur le carnet -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/50 font-display italic text-lg md:text-2xl whitespace-nowrap drop-shadow-md">Carnet</div>
+                <!-- Élastique de fermeture -->
+                <div class="absolute top-0 bottom-0 right-3 md:right-5 w-1.5 md:w-2 bg-black/50 shadow-sm"></div>
+                <!-- Marque-page (ruban) -->
+                <div class="absolute bottom-[-10px] left-8 md:left-10 w-2 h-6 md:w-3 md:h-8 bg-[#8B2626]/80 shadow-sm"></div>
+            </div>
+        </div>
+
+    </section>
+
+    <div id="overlay" onclick="closeReader()"></div>
+
+    <!-- ================= TIROIR DE LECTURE ================= -->
+    <aside id="reader-panel" class="flex flex-col">
+        <header class="sticky top-0 bg-museum-bg/95 backdrop-blur z-10 border-b border-museum-accent px-6 py-4 md:px-8 md:py-5 flex justify-between items-center">
+            <div class="font-sans text-xs tracking-widest text-museum-red font-bold uppercase" id="reader-category">Dossier</div>
+            <button onclick="closeReader()" class="p-2 text-museum-ink/80 hover:text-museum-red hover:bg-museum-accent/30 rounded-full transition-colors">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </header>
+        <div class="p-6 md:p-12 reader-content overflow-y-auto flex-grow bg-museum-bg" id="reader-content">
+            <!-- Rempli par JS -->
+        </div>
+    </aside>
+
+    <!-- ================= SCRIPTS ================= -->
+    <script>
+        // 1. Base de données narrative
+        const archiveData = {
+            'badge': {
+                category: "L'Amorce",
+                title: "La médaille d'Albert Fillinger",
+                subtitle: "Médaille des cheminots (1946), œuvre de C. Favre-Bertin.",
+                image: "assets/médaille1.jpg",
+                image2: "assets/médaille2.jpg",
+                content: `
+                    <p class="drop-cap">Dans les familles, il y a ce qui se dit, et ce qui se transmet. Je n'ai hérité d'aucun grand récit de mon arrière-grand-père, seulement de ce lourd objet en métal : une médaille des cheminots de la République Française.</p>
+                    <p class="mt-4">Créée par le sculpteur Charles Maurice Favre-Bertin, elle porte au dos une gravure nette : son nom, <strong>A. Fillinger</strong>, et une date, <strong>1946</strong>.</p>
+                    <h3 class="font-display text-2xl mt-8 mb-4">La démarche de l'historien</h3>
+                    <p>Plutôt que de la laisser dans un tiroir, j'ai décidé de l'utiliser comme une clé. Que signifiait être cheminot avant et pendant les grands bouleversements du XXe siècle ? L'histoire personnelle s'efface peu à peu pour nous obliger à regarder le contexte global de la France de cette époque.</p>
+                `,
+                unlocks: 'social',
+                unlockMessage: "Pour comprendre la valeur de cette médaille, la première étape est d'explorer l'histoire sociale de la profession ferroviaire de l'époque.",
+                unlockBtnText: "Ouvrir les archives photographiques"
+            },
+            'social': {
+                category: "Histoire Sociale",
+                title: "Les Seigneurs du Rail",
+                subtitle: "La culture et la fierté cheminote au XXe siècle.",
+                image: "assets/Cheminots.jpg",
+                content: `
+                    <p class="drop-cap">Tenir cet objet, c’est toucher à l'âge d'or du chemin de fer. Avant la généralisation de l'automobile, le train est l'artère vitale de la nation. Il transporte les hommes, le courrier, le charbon, la modernité.</p>
+                    <h3 class="font-display text-2xl mt-8 mb-4">Une aristocratie ouvrière</h3>
+                    <p>Le métier de cheminot était auréolé d'un immense prestige, mais d'une dureté redoutable. Des "gueules noires" qui enfournaient le charbon, aux mécaniciens maîtrisant ces monstres d'acier, la discipline était stricte, presque militaire.</p>
+                    <p class="mt-4">Recevoir la médaille de la compagnie certifiait une appartenance à une véritable communauté solidaire, avec ses propres codes, ses syndicats puissants et ses cités cheminotes.</p>
+                    <div class="border-l-4 border-museum-ink bg-museum-accent/20 p-6 my-8 text-lg font-serif italic text-museum-ink">
+                        "La régularité du train garantit l'ordre de la nation. Le cheminot en est le gardien."
+                    </div>
+                `,
+                unlocks: 'alsace',
+                unlockMessage: "La vie de ces travailleurs va être brutalement percutée par la géopolitique. Les documents géographiques pointent vers la région frontalière de mon aïeul : l'Alsace.",
+                unlockBtnText: "Consulter les cartes régionales"
+            },
+            'alsace': {
+                category: "Contexte Géopolitique",
+                title: "L'Alsace, terre déchirée",
+                subtitle: "La particularité d'un territoire frontalier.",
+                image: "assets/carte alsace.jpg",
+                content: `
+                    <p class="drop-cap">Pour comprendre le contexte spécifique dans lequel s'inscrit l'histoire de ma famille, il faut regarder la carte. Contrairement au reste de la France, l'Alsace a une histoire d'une complexité douloureuse.</p>
+                    <h3 class="font-display text-2xl mt-8 mb-4">L'annexion de fait</h3>
+                    <p>Dès 1940, la région subit une annexion de fait par le IIIe Reich. La frontière est fermée, la langue française est bannie. Le réseau ferroviaire alsacien n'est plus la S.N.C.F., mais est purement et simplement absorbé par la <em>Deutsche Reichsbahn</em> (les chemins de fer allemands).</p>
+                    <p class="mt-4">Les cheminots locaux se retrouvent piégés : ils doivent prêter serment au régime sous peine de déportation immédiate au camp de Schirmeck. À partir de 1942, c'est le drame de l'incorporation de force des "Malgré-nous". Être frontalier signifiait être au cœur du broyeur.</p>
+                `,
+                unlocks: 'war',
+                unlockMessage: "Au-delà de la situation régionale, le chemin de fer tout entier est devenu l'outil stratégique majeur du conflit. Les rapports militaires le prouvent.",
+                unlockBtnText: "Examiner les rapports logistiques"
+            },
+            'war': {
+                category: "Histoire Militaire",
+                title: "La logistique du conflit",
+                subtitle: "Le rôle stratégique absolu du réseau ferroviaire.",
+                image: "assets/bataille du rail.jpg",
+                content: `
+                    <p class="drop-cap">La Seconde Guerre mondiale fut une guerre de logistique. Les archives militaires déclassifiées montrent que le contrôle des rails équivalait au contrôle du pays.</p>
+                    <h3 class="font-display text-2xl mt-8 mb-4">L'outil de toutes les missions</h3>
+                    <p>Les trains servaient à l'acheminement des troupes, au pillage économique des ressources vers l'Allemagne, mais aussi, de façon tragique, au fonctionnement du système concentrationnaire nazi.</p>
+                    <h3 class="font-display text-2xl mt-8 mb-4">La Bataille du Rail</h3>
+                    <p>En réaction, les infrastructures ferroviaires sont devenues la cible numéro un. Les cheminots, maîtrisant parfaitement leur outil de travail, ont organisé une résistance redoutable : sabotages de locomotives, sable dans les essieux, retards volontaires et renseignements transmis aux Alliés.</p>
+                `,
+                unlocks: 'conclusion',
+                unlockMessage: "L'exploration historique touche à sa fin. Il est temps de rassembler les notes et de comprendre le lien entre cet objet et l'Histoire.",
+                unlockBtnText: "Ouvrir le carnet de conclusions"
+            },
+            'conclusion': {
+                category: "Épilogue",
+                title: "La trace et l'oubli",
+                subtitle: "Le rôle des objets dans la mémoire.",
+                image: "assets/carnets mémoire.jpg",
+                content: `
+                    <p class="drop-cap">Au terme de cette recherche, la médaille datée de 1946 n'a plus le même poids. Ce n'est pas seulement le souvenir d'un aïeul taiseux, c'est une archive à part entière, symbole d'une vie qui a traversé la tempête.</p>
+                    <h3 class="font-display text-2xl mt-8 mb-4">Relier la petite et la grande Histoire</h3>
+                    <p>Les objets familiaux sont des ponts. Ils nous forcent à ouvrir des livres d'histoire que nous aurions laissés fermés. Ils humanisent les grands bouleversements géopolitiques en nous rappelant que derrière chaque événement statistique (annexion, grève, militarisation), il y a des individus ordinaires qui portaient un uniforme et accomplissaient leur métier.</p>
+                    <div class="text-center my-12 border-t border-b border-museum-accent py-8">
+                        <p class="font-serif text-lg text-museum-ink/80 max-w-md mx-auto italic">
+                            Les objets survivent à ceux qui les portent. Il nous appartient de les faire parler pour que la mémoire collective subsiste.
+                        </p>
+                    </div>
+                    <p class="text-center mt-8 font-sans uppercase tracking-widest text-sm text-museum-red font-bold">Fin de l'exposition</p>
+                `
+            }
+        };
+
+        const unlockedItems = new Set(['badge']);
+        const drawnConnections = new Set();
+
+        const connections = [
+            { from: 'node-badge', to: 'node-social' },
+            { from: 'node-social', to: 'node-alsace' },
+            { from: 'node-alsace', to: 'node-war' },
+            { from: 'node-war', to: 'node-conclusion' }
+        ];
+
+        const svgLayer = document.getElementById('strings-layer');
+        const boardSection = document.getElementById('board-section');
+
+        // 2. Fonction d'animation d'ouverture de la boîte
+        function startExploration() {
+            const memoryBox = document.getElementById('memory-box');
+            const flapLeft = memoryBox.querySelector('.box-flap-left');
+            const flapRight = memoryBox.querySelector('.box-flap-right');
+            const introBtn = document.getElementById('intro-btn');
+            const introText = document.getElementById('intro-text');
+            const introSection = document.getElementById('intro-section');
+            const uiIndicator = document.getElementById('ui-indicator');
+
+            // 1. Ouvrir les volets et cacher le bouton instantanément
+            flapLeft.classList.add('open');
+            flapRight.classList.add('open');
+            introBtn.style.opacity = '0';
+            introBtn.style.pointerEvents = 'none';
+            introText.style.opacity = '0';
+
+            // 2. Plonger dans la boîte (zoom) après l'ouverture.
+            // La boîte reste opaque pour masquer le bois en fondu !
+            setTimeout(() => {
+                memoryBox.classList.add('zoom-in');
+            }, 800);
+
+            // 3. Disparition de l'écran d'intro révélant le liège et affichage UI
+            setTimeout(() => {
+                introSection.style.opacity = '0';
+                setTimeout(() => {
+                    introSection.style.display = 'none';
+                    uiIndicator.classList.remove('opacity-0');
+                    uiIndicator.classList.add('opacity-100');
+                }, 1000);
+            }, 1500);
+        }
+
+        // 3. Dessin des fils rouges (SVG)
+        function drawStrings(animateNew = false) {
+            svgLayer.innerHTML = ''; 
+            const deskRect = boardSection.getBoundingClientRect();
+
+            connections.forEach(conn => {
+                const el1 = document.getElementById(conn.from);
+                const el2 = document.getElementById(conn.to);
+                
+                if (!el1 || !el2 || el1.classList.contains('locked-item') || el2.classList.contains('locked-item')) {
+                    return;
+                }
+
+                const rect1 = el1.getBoundingClientRect();
+                const rect2 = el2.getBoundingClientRect();
+
+                const x1 = rect1.left + rect1.width / 2 - deskRect.left;
+                const y1 = rect1.top + (rect1.height * 0.1) - deskRect.top; 
+                const x2 = rect2.left + rect2.width / 2 - deskRect.left;
+                const y2 = rect2.top + (rect2.height * 0.1) - deskRect.top;
+
+                const midX = (x1 + x2) / 2;
+                const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                const midY = (y1 + y2) / 2 + (distance * 0.15); 
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`);
+                path.setAttribute("class", "red-string");
+
+                const connId = conn.from + '-' + conn.to;
+                
+                if (animateNew && !drawnConnections.has(connId)) {
+                    drawnConnections.add(connId);
+                    svgLayer.appendChild(path);
+                    
+                    const length = path.getTotalLength();
+                    path.style.strokeDasharray = length;
+                    path.style.strokeDashoffset = length;
+                    path.getBoundingClientRect(); // Trigger reflow
+                    path.style.transition = 'stroke-dashoffset 1.5s ease-in-out';
+                    path.style.strokeDashoffset = '0';
+                } else {
+                    drawnConnections.add(connId);
+                    svgLayer.appendChild(path);
+                }
+            });
+        }
+
+        // 4. Système de lecture
+        const readerPanel = document.getElementById('reader-panel');
+        const overlay = document.getElementById('overlay');
+        const contentDiv = document.getElementById('reader-content');
+        
+        function openReader(id) {
+            const data = archiveData[id];
+            if (!data) return;
+
+            document.getElementById('node-' + id).classList.remove('just-unlocked');
+            document.getElementById('reader-category').textContent = data.category;
+            
+            // Gestion de l'affichage double image ou simple image
+            let imageHTML = '';
+            if (data.image2) {
+                imageHTML = `
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <img src="${data.image}" onerror="this.style.display='none'" alt="${data.title} - Face 1" class="w-full h-48 md:h-64 object-cover rounded shadow-md sepia-[20%] grayscale-[20%] border border-museum-accent">
+                        <img src="${data.image2}" onerror="this.style.display='none'" alt="${data.title} - Face 2" class="w-full h-48 md:h-64 object-cover rounded shadow-md sepia-[20%] grayscale-[20%] border border-museum-accent">
+                    </div>
+                `;
+            } else {
+                imageHTML = `
+                    <img src="${data.image}" onerror="this.style.display='none'" alt="${data.title}" class="w-full h-48 md:h-64 object-cover rounded shadow-md mb-8 sepia-[20%] grayscale-[20%] border border-museum-accent">
+                `;
+            }
+
+            // Mise en place de la vraie image
+            let htmlContent = `
+                <h1 class="text-3xl md:text-5xl font-display font-bold text-museum-ink mb-4 leading-tight">${data.title}</h1>
+                <p class="text-lg md:text-xl font-sans tracking-wide text-museum-ink/70 mb-8 pb-4 border-b border-museum-accent">${data.subtitle}</p>
+                
+                ${imageHTML}
+                
+                <div class="prose prose-stone prose-base md:prose-lg text-museum-ink leading-relaxed font-serif">
+                    ${data.content}
+                </div>
+            `;
+
+            if (data.unlocks && !unlockedItems.has(data.unlocks)) {
+                htmlContent += `
+                    <div class="mt-12 bg-museum-accent/10 border-l-4 border-museum-red p-6 md:p-8 shadow-sm">
+                        <div class="flex items-center space-x-3 text-museum-red mb-3">
+                            <i data-lucide="folder-search" class="w-5 h-5 md:w-6 md:h-6"></i>
+                            <h4 class="font-sans font-bold uppercase tracking-widest text-xs md:text-sm">Piste d'exploration suivante</h4>
+                        </div>
+                        <p class="font-serif italic text-museum-ink/80 mb-6 text-sm md:text-base">${data.unlockMessage}</p>
+                        <button onclick="unlockNext('${data.unlocks}')" class="bg-[#8B2626] text-white px-5 py-3 rounded font-sans font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-[#5c1919] transition-colors shadow-md w-full md:w-auto" style="background-color: #8B2626; color: white;">
+                            ${data.unlockBtnText}
+                        </button>
+                    </div>
+                `;
+            }
+
+            contentDiv.innerHTML = htmlContent;
+            lucide.createIcons();
+            readerPanel.classList.add('open');
+            overlay.classList.add('open');
+            contentDiv.scrollTop = 0;
+        }
+
+        function closeReader() {
+            readerPanel.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+
+        function unlockNext(nextId) {
+            closeReader();
+            unlockedItems.add(nextId);
+            document.getElementById('progress-indicator').textContent = `Document ${unlockedItems.size} / 5`;
+
+            setTimeout(() => {
+                const node = document.getElementById('node-' + nextId);
+                node.classList.remove('locked-item');
+                node.classList.add('just-unlocked'); 
+                
+                setTimeout(() => { drawStrings(true); }, 400); 
+            }, 400);
+        }
+
+        // 5. Glisser - Déposer (Drag & Drop)
+        let highestZ = 50;
+        document.querySelectorAll('.pinned-item').forEach(item => {
+            let isDragging = false;
+            let isClick = true;
+            let startX, startY, initX, initY;
+
+            const dragStart = (e) => {
+                if(item.classList.contains('locked-item')) return;
+
+                isDragging = true; isClick = true;
+                highestZ++; item.style.zIndex = highestZ;
+
+                const currentTransform = item.style.transform;
+                const rotationMatch = currentTransform.match(/rotate\(([^)]+)\)/);
+                const rotation = rotationMatch ? rotationMatch[0] : '';
+                
+                if (e.type === "touchstart") {
+                    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+                } else {
+                    startX = e.clientX; startY = e.clientY;
+                }
+
+                initX = item.offsetLeft; initY = item.offsetTop;
+
+                const drag = (e) => {
+                    if (!isDragging) return;
+                    let currX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+                    let currY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+
+                    const dx = currX - startX; const dy = currY - startY;
+
+                    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) isClick = false;
+
+                    item.style.left = `${initX + dx}px`;
+                    item.style.top = `${initY + dy}px`;
+                    item.style.transform = rotation; 
+
+                    drawStrings();
+                };
+
+                const dragEnd = () => {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', drag);
+                    document.removeEventListener('mouseup', dragEnd);
+                    document.removeEventListener('touchmove', drag);
+                    document.removeEventListener('touchend', dragEnd);
+
+                    if (isClick) openReader(item.getAttribute('data-id'));
+                };
+
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', dragEnd);
+                document.addEventListener('touchmove', drag, { passive: false });
+                document.addEventListener('touchend', dragEnd);
+            };
+
+            item.addEventListener('mousedown', dragStart);
+            item.addEventListener('touchstart', dragStart, { passive: true });
+        });
+
+        lucide.createIcons();
+        window.addEventListener('resize', () => drawStrings(false));
+
+    </script>
+</body>
+</html>

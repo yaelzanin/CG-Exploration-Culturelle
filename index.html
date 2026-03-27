@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exposition Virtuelle | Une médaille, une histoire</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="CG.png">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -46,6 +49,16 @@
             background-color: #FDFBF7;
             color: #2C2825;
             overflow: hidden; 
+        }
+
+        /* --- SÉLECTION DE TEXTE SÉCURISÉE --- */
+        ::selection {
+            background-color: #8B2626;
+            color: #FDFBF7;
+        }
+        ::-moz-selection {
+            background-color: #8B2626;
+            color: #FDFBF7;
         }
 
         /* --- SECTION INTRO : BOÎTE EN CARTON AU GRENIER --- */
@@ -167,13 +180,12 @@
         }
 
         .pinned-item {
-            position: absolute; cursor: grab;
+            position: absolute; cursor: pointer;
             transition: opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.2s ease, filter 0.3s ease;
             box-shadow: 5px 10px 20px rgba(0,0,0,0.4);
             z-index: 10; transform-origin: center top;
         }
         
-        .pinned-item:active { cursor: grabbing; }
         .pinned-item:hover:not(.locked-item) {
             transform: scale(1.05) !important; z-index: 50 !important; filter: brightness(1.1);
         }
@@ -243,7 +255,7 @@
         }
     </style>
 </head>
-<body class="font-serif antialiased selection:bg-museum-red selection:text-white">
+<body class="font-serif antialiased">
 
     <!-- ================= SECTION 1 : INTRODUCTION (ANIMATION BOÎTE CARTON) ================= -->
     <section id="intro-section">
@@ -310,7 +322,7 @@
         </div>
 
         <!-- NOEUD 4 : CARTE ALSACE -->
-        <div class="pinned-item bg-white p-1 md:p-2 shadow-lg border border-museum-accent locked-item w-32 h-32 md:w-56 md:h-56 top-[15%] right-[5%] md:right-auto md:top-[15%] md:left-[70%]" 
+        <div class="pinned-item bg-white p-1.5 md:p-2 shadow-lg border border-museum-accent locked-item w-32 h-32 md:w-56 md:h-56 top-[15%] right-[5%] md:right-auto md:top-[15%] md:left-[70%]" 
              id="node-alsace" data-id="alsace" style="transform: rotate(-4deg);">
             <div class="pin"></div>
             <div class="w-full h-full overflow-hidden border border-museum-accent/50">
@@ -664,65 +676,17 @@
             }, 400);
         }
 
-        // 5. Glisser - Déposer (Drag & Drop)
+        // 5. Clic sur les objets (Drag & Drop supprimé pour l'ergonomie)
         let highestZ = 50;
         document.querySelectorAll('.pinned-item').forEach(item => {
-            let isDragging = false;
-            let isClick = true;
-            let startX, startY, initX, initY;
-
-            const dragStart = (e) => {
+            item.addEventListener('click', () => {
                 if(item.classList.contains('locked-item')) return;
-
-                isDragging = true; isClick = true;
-                highestZ++; item.style.zIndex = highestZ;
-
-                const currentTransform = item.style.transform;
-                const rotationMatch = currentTransform.match(/rotate\(([^)]+)\)/);
-                const rotation = rotationMatch ? rotationMatch[0] : '';
                 
-                if (e.type === "touchstart") {
-                    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                } else {
-                    startX = e.clientX; startY = e.clientY;
-                }
-
-                initX = item.offsetLeft; initY = item.offsetTop;
-
-                const drag = (e) => {
-                    if (!isDragging) return;
-                    let currX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
-                    let currY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
-
-                    const dx = currX - startX; const dy = currY - startY;
-
-                    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) isClick = false;
-
-                    item.style.left = `${initX + dx}px`;
-                    item.style.top = `${initY + dy}px`;
-                    item.style.transform = rotation; 
-
-                    drawStrings();
-                };
-
-                const dragEnd = () => {
-                    isDragging = false;
-                    document.removeEventListener('mousemove', drag);
-                    document.removeEventListener('mouseup', dragEnd);
-                    document.removeEventListener('touchmove', drag);
-                    document.removeEventListener('touchend', dragEnd);
-
-                    if (isClick) openReader(item.getAttribute('data-id'));
-                };
-
-                document.addEventListener('mousemove', drag);
-                document.addEventListener('mouseup', dragEnd);
-                document.addEventListener('touchmove', drag, { passive: false });
-                document.addEventListener('touchend', dragEnd);
-            };
-
-            item.addEventListener('mousedown', dragStart);
-            item.addEventListener('touchstart', dragStart, { passive: true });
+                highestZ++; 
+                item.style.zIndex = highestZ;
+                
+                openReader(item.getAttribute('data-id'));
+            });
         });
 
         lucide.createIcons();

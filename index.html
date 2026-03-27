@@ -334,7 +334,17 @@
 
     </section>
 
+    <!-- Overlay de lecture -->
     <div id="overlay" onclick="closeReader()"></div>
+
+    <!-- Visionneuse plein écran (Lightbox) pour les médailles -->
+    <div id="lightbox" class="fixed inset-0 z-[400] bg-black/95 opacity-0 pointer-events-none transition-opacity duration-300 flex justify-center items-center" onclick="closeLightbox()">
+        <button class="absolute top-4 right-4 md:top-8 md:right-8 text-white/70 hover:text-white transition-colors p-2 z-50" onclick="closeLightbox()">
+            <i data-lucide="x" class="w-8 h-8 md:w-10 md:h-10"></i>
+        </button>
+        <!-- L'image de la lightbox ne ferme pas le modal si on clique dessus -->
+        <img id="lightbox-img" src="" alt="Aperçu agrandi" class="max-w-[90vw] max-h-[90vh] object-contain shadow-2xl rounded" onclick="event.stopPropagation()">
+    </div>
 
     <!-- ================= TIROIR DE LECTURE ================= -->
     <aside id="reader-panel" class="flex flex-col">
@@ -532,6 +542,24 @@
             });
         }
 
+        // --- Fonctions de la Lightbox (Visionneuse plein écran) ---
+        function openLightbox(src) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            lightboxImg.src = src;
+            
+            // Fait apparaitre la lightbox au dessus de tout
+            lightbox.classList.remove('pointer-events-none', 'opacity-0');
+            lightbox.classList.add('pointer-events-auto', 'opacity-100');
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            // Cache la lightbox
+            lightbox.classList.remove('pointer-events-auto', 'opacity-100');
+            lightbox.classList.add('pointer-events-none', 'opacity-0');
+        }
+
         // 4. Système de lecture
         const readerPanel = document.getElementById('reader-panel');
         const overlay = document.getElementById('overlay');
@@ -544,19 +572,43 @@
             document.getElementById('node-' + id).classList.remove('just-unlocked');
             document.getElementById('reader-category').textContent = data.category;
             
-            // Gestion de l'affichage double image ou simple image
+            // Gestion de l'affichage
             let imageHTML = '';
-            if (data.image2) {
-                imageHTML = `
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <img src="${data.image}" onerror="this.style.display='none'" alt="${data.title} - Face 1" class="w-full h-48 md:h-64 object-cover rounded shadow-md sepia-[20%] grayscale-[20%] border border-museum-accent">
-                        <img src="${data.image2}" onerror="this.style.display='none'" alt="${data.title} - Face 2" class="w-full h-48 md:h-64 object-cover rounded shadow-md sepia-[20%] grayscale-[20%] border border-museum-accent">
-                    </div>
-                `;
+            
+            // On vérifie si c'est l'objet badge pour activer la vue agrandie au clic
+            if (id === 'badge') {
+                if (data.image2) {
+                    imageHTML = `
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <div class="relative group cursor-pointer" onclick="openLightbox('${data.image}')">
+                                <img src="${data.image}" onerror="this.style.display='none'" alt="${data.title} - Face 1" class="w-full h-48 md:h-64 object-cover rounded shadow-md sepia-[20%] grayscale-[20%] border border-museum-accent group-hover:scale-[1.02] transition-transform duration-300">
+                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded flex items-center justify-center">
+                                    <i data-lucide="zoom-in" class="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md w-8 h-8"></i>
+                                </div>
+                            </div>
+                            <div class="relative group cursor-pointer" onclick="openLightbox('${data.image2}')">
+                                <img src="${data.image2}" onerror="this.style.display='none'" alt="${data.title} - Face 2" class="w-full h-48 md:h-64 object-cover rounded shadow-md sepia-[20%] grayscale-[20%] border border-museum-accent group-hover:scale-[1.02] transition-transform duration-300">
+                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded flex items-center justify-center">
+                                    <i data-lucide="zoom-in" class="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md w-8 h-8"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
             } else {
-                imageHTML = `
-                    <img src="${data.image}" onerror="this.style.display='none'" alt="${data.title}" class="w-full h-48 md:h-64 object-cover rounded shadow-md mb-8 sepia-[20%] grayscale-[20%] border border-museum-accent">
-                `;
+                // Documents normaux non cliquables
+                if (data.image2) {
+                    imageHTML = `
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <img src="${data.image}" onerror="this.style.display='none'" alt="${data.title} - Face 1" class="w-full h-48 md:h-64 object-cover rounded shadow-md sepia-[20%] grayscale-[20%] border border-museum-accent">
+                            <img src="${data.image2}" onerror="this.style.display='none'" alt="${data.title} - Face 2" class="w-full h-48 md:h-64 object-cover rounded shadow-md sepia-[20%] grayscale-[20%] border border-museum-accent">
+                        </div>
+                    `;
+                } else {
+                    imageHTML = `
+                        <img src="${data.image}" onerror="this.style.display='none'" alt="${data.title}" class="w-full h-48 md:h-64 object-cover rounded shadow-md mb-8 sepia-[20%] grayscale-[20%] border border-museum-accent">
+                    `;
+                }
             }
 
             // Mise en place de la vraie image

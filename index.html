@@ -142,11 +142,6 @@
         .box-flap-left.open { transform: rotateY(-125deg); }
         .box-flap-right.open { transform: rotateY(125deg); }
 
-        /* Bouton d'ouverture */
-        #intro-btn {
-            transition: opacity 0.4s ease;
-        }
-
         /* --- SECTION BOARD (INTERACTIVE CANVAS) --- */
         #board-section {
             position: absolute; top: 0; left: 0;
@@ -220,7 +215,7 @@
         .clip {
             position: absolute; top: -5px; left: 15px;
             width: 12px; height: 25px; border: 2px solid #b0b0b0; border-radius: 10px;
-            box-shadow: 2px 2px 3px rgba(0,0,0,0.3); z-index: 20;
+            box-shadow: 2px 2px 3px rgba(0,0,0,0.2); z-index: 20;
         }
         @media (min-width: 768px) {
             .clip { width: 15px; height: 35px; left: 20px; border-width: 3px; }
@@ -237,7 +232,7 @@
         #reader-panel.open { right: 0; }
         
         #overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px);
             opacity: 0; pointer-events: none; transition: opacity 0.5s ease; z-index: 150;
         }
         #overlay.open { opacity: 1; pointer-events: auto; }
@@ -269,8 +264,8 @@
             <div class="box-flap-left"></div>
             <div class="box-flap-right"></div>
             
-            <!-- Bouton central marron foncé (Accessible et identifiable) -->
-            <div id="intro-btn" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#3a2514] px-6 py-3 md:px-8 md:py-4 rounded-full border-2 border-[#1a1008] text-white font-bold shadow-[0_5px_15px_rgba(0,0,0,0.8)] group-hover:bg-[#21150b] group-hover:scale-105 transition-all flex items-center gap-2 md:gap-3 font-sans text-[10px] md:text-xs uppercase tracking-widest z-20">
+            <!-- Bouton central marron foncé avec belle animation fluide au survol direct -->
+            <div id="intro-btn" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#3a2514] px-6 py-3 md:px-8 md:py-4 rounded-full border-2 border-[#1a1008] text-white font-bold shadow-[0_5px_15px_rgba(0,0,0,0.8)] hover:bg-[#21150b] hover:scale-110 transition-all duration-700 ease-out flex items-center gap-2 md:gap-3 font-sans text-[10px] md:text-xs uppercase tracking-widest z-20">
                 <i data-lucide="unlock" class="w-4 h-4 md:w-5 md:h-5"></i>
                 <span>Cliquer pour ouvrir</span>
             </div>
@@ -315,7 +310,7 @@
         </div>
 
         <!-- NOEUD 4 : CARTE ALSACE -->
-        <div class="pinned-item bg-white p-1.5 md:p-2 shadow-lg border border-museum-accent locked-item w-32 h-32 md:w-56 md:h-56 top-[15%] right-[5%] md:right-auto md:top-[15%] md:left-[70%]" 
+        <div class="pinned-item bg-white p-1 md:p-2 shadow-lg border border-museum-accent locked-item w-32 h-32 md:w-56 md:h-56 top-[15%] right-[5%] md:right-auto md:top-[15%] md:left-[70%]" 
              id="node-alsace" data-id="alsace" style="transform: rotate(-4deg);">
             <div class="pin"></div>
             <div class="w-full h-full overflow-hidden border border-museum-accent/50">
@@ -362,8 +357,8 @@
                 category: "L'Amorce",
                 title: "La médaille d'Albert Fillinger",
                 subtitle: "Médaille des cheminots (1946), œuvre de C. Favre-Bertin.",
-                image: "assets/médaille1.jpg",
-                image2: "assets/médaille2.jpg",
+                image: "assets/image_9583ac.jpg",
+                image2: "assets/image_9583ca.jpg",
                 content: `
                     <p class="drop-cap">Dans les familles, il y a ce qui se dit, et ce qui se transmet. Je n'ai hérité d'aucun grand récit de mon arrière-grand-père, seulement de ce lourd objet en métal : une médaille des cheminots de la République Française.</p>
                     <p class="mt-4">Créée par le sculpteur Charles Maurice Favre-Bertin, elle porte au dos une gravure nette : son nom, <strong>A. Fillinger</strong>, et une date, <strong>1946</strong>.</p>
